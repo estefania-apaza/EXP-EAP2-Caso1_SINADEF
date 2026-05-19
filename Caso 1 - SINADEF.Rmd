@@ -10,7 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+# Agregamos la librería Tidyverse
 library(tidyverse)
+
+# Añadimos la semilla 123
+set.seed(123)
 ```
 
 
@@ -18,6 +22,7 @@ library(tidyverse)
 # Abrimos la base de datos en R
 base1 <- read.csv("SINADEF_DATOS_ABIERTOS.csv")
 ```
+
 ```{r}
 # Revisamos los nombres de las variables
 names(base1)
@@ -69,18 +74,51 @@ BD_RATIOS <- BD_RATIOS %>%
 
 ```{r}
 # Nos quedamos solo con provincia y ratio
-
 BASE_SINADEF <- BD_RATIOS %>%
   select(PROVINCIA_FALLECIMIENTO, ratio)
 
-# Revisamos
+# Revisamos que la base haya cargado bien los datos
 head(BASE_SINADEF)
 
-# Guardar CSV
-
+# Guardamos el archivo CSV
 write.csv(BASE_SINADEF,
           "ratio_provincias.csv",
           row.names = FALSE)
 ```
 
+```{r}
+# ---
+# Respuesta a preguntas
+# ---
+arrange(BASE_SINADEF, desc(ratio))
+```
+```{r}
+# Pregunta 1:
+# En Ocros se duplicó la tasa de mortalidad y no en Churcampa
+
+BASE_SINADEF %>%
+  filter(PROVINCIA_FALLECIMIENTO %in% c("CHURCAMPA", "OCROS"))
+
+# FALSO. NO CALCULAMOS TASA DE MORTALIDAD SINO RATIO DE MUERTES.
+```
+```{r}
+# Pregunta 2:
+# En 23 provincias la tasa, al menos,se duplicó
+
+BASE_SINADEF %>%
+  filter(is.finite(ratio) & ratio >= 2) %>%
+  nrow()
+
+# VERDADERO
+```
+
+```{r}
+# Pregunta 3:
+# Hay solo una provincia con mortalidad atípica: Datem del Marañon
+
+arrange(BASE_SINADEF, desc(ratio)) %>%
+  head(10)
+
+# FALSO
+```
 
