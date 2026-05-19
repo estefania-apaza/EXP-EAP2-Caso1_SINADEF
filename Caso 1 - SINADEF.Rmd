@@ -1,0 +1,86 @@
+---
+title: 'Caso 1 - SINADEF'
+author: "Estefanía Apaza"
+date: "2026-05-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+# Abrimos la base de datos en R
+base1 <- read.csv("SINADEF_DATOS_ABIERTOS.csv")
+```
+```{r}
+# Revisamos los nombres de las variables
+names(base1)
+```
+
+
+```{r}
+# Filtramos la base para los años 2019 y 2020
+
+base_filtrada <- base1 %>%
+  filter(ANIO %in% c(2019, 2020))
+ 
+```
+
+```{r}
+# Realizamos el conteo de muertes por provincia y año agrupando las variables
+
+MUERTES <- base_filtrada %>%
+  group_by(PROVINCIA_FALLECIMIENTO, ANIO) %>%
+  summarise(TOTAL_MUERTES = n())
+
+```
+
+```{r}
+# Separamos las muertes por año
+
+MUERTES_2019 <- MUERTES %>%
+  filter(ANIO == 2019)
+
+MUERTES_2020 <- MUERTES %>%
+  filter(ANIO == 2020)
+
+```
+
+```{r}
+# Unimos ambas tablas por provincia
+BD_RATIOS <- merge(MUERTES_2019,
+                MUERTES_2020,
+                by = "PROVINCIA_FALLECIMIENTO")
+```
+
+```{r}
+#Calculamos los ratios
+
+BD_RATIOS <- BD_RATIOS %>%
+  mutate(ratio = TOTAL_MUERTES.y / TOTAL_MUERTES.x)
+
+```
+
+```{r}
+# Nos quedamos solo con provincia y ratio
+
+BASE_SINADEF <- BD_RATIOS %>%
+  select(PROVINCIA_FALLECIMIENTO, ratio)
+
+# Revisamos
+head(BASE_SINADEF)
+
+# Guardar CSV
+
+write.csv(BASE_SINADEF,
+          "ratio_provincias.csv",
+          row.names = FALSE)
+```
+
+
